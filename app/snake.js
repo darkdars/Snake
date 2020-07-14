@@ -3,14 +3,14 @@ var gray = 51;
 var white = 255;
 var black = 0;
 var yellow = [255, 255, 0];
-var violet = [238,130,238];
+var violet = [238, 130, 238];
 var board = null
 
 // Enviromnent variables
 var sizeWindowX = 600;
 var sizeWindowY = 600;
 var frame_rate = 10;
-var size = 20;
+var size = 15;
 
 class Blocks {
     _pos_x = -1;
@@ -34,7 +34,7 @@ class Blocks {
     set pos_y(value) {
         this._pos_y = value;
     }
-    
+
 
 }
 
@@ -48,9 +48,10 @@ class Snake {
 
     constructor() {
         this._head = new Blocks(floor(sizeWindowX / 2), floor(sizeWindowY / 2));
+        this._body = [];
         this._yspeed = -this._speed;
+        this._xspeed = 0;
         this._total = 0;
-        this._distance = 20;
     }
 
     get head() {
@@ -103,6 +104,7 @@ class Snake {
     movement() {
         this.bodyMovement();
         this.headMovement();
+        this.status();
     }
 
     headMovement() {
@@ -111,27 +113,62 @@ class Snake {
         head.pos_x += this.xspeed * size;
         head.pos_y += this.yspeed * size;
 
-        head.pos_x = constrain(head.pos_x, 0, sizeWindowX - size);
-        head.pos_y = constrain(head.pos_y, 0, sizeWindowY - size);
+       // head.pos_x = constrain(head.pos_x, 0, sizeWindowX - size);
+       // head.pos_y = constrain(head.pos_y, 0, sizeWindowY - size);
     }
 
     bodyMovement() {
-        for (let i = 0 ; i <  this.body.length - 1; i++) {
+        for (let i = 0; i < this.body.length - 1; i++) {
             this.body[i] = this.body[i + 1];
         }
         this.body[this.body.length - 1] = new Blocks(this.head.pos_x, this.head.pos_y);
     }
 
-    eat(){
+    eat() {
         this.total += 1;
         this.addTail();
     }
 
-    addTail(){
+    addTail() {
         let pos_x = this.head.pos_x;
         let pos_y = this.head.pos_y;
 
         this.body.push(new Blocks(pos_x, pos_y));
+    }
+
+
+    status() {
+
+        if (this.checkColision()) {
+            console.log("New Start!");
+            this._head = new Blocks(floor(sizeWindowX / 2), floor(sizeWindowY / 2));
+            this._body = [];
+            this._yspeed = -this._speed;
+            this._xspeed = 0;
+            this._total = 0;
+        }
+
+    }
+
+    checkColision() {
+        var head = this.head;
+
+        for (var i = 0; i < this.body.length; i++) {
+            var pos = this.body[i];
+            var d = dist(head.pos_x, head.pos_y, pos.pos_x, pos.pos_y);
+
+            if (d < 1) {
+                return true;
+            }
+
+        }
+
+        if(head.pos_x < 0 || head.pos_x >= sizeWindowX ||
+            head.pos_y < 0 || head.pos_y > sizeWindowY){
+            return true;
+        }
+
+        return false;
     }
 
 }
@@ -178,28 +215,24 @@ class Board {
         this.snakeEat();
     }
 
-    snakeEat() {   
+    snakeEat() {
         if (this.checkColisionBetweenTwoBlocks(this.snake.head, this.food)) {
             this.food = this.randomFood();
             this.snake.eat();
         }
     }
 
-    checkColisionBetweenTwoBlocks(block1, block2){
-        var d = dist(block1.pos_x , block1.pos_y, block2.pos_x, block2.pos_y);
-        if(d < size/2 + 5){
+    checkColisionBetweenTwoBlocks(block1, block2) {
+        var d = dist(block1.pos_x, block1.pos_y, block2.pos_x, block2.pos_y);
+        if (d < size / 2 + 5) {
             return true;
-        }else{
+        } else {
             return false;
-        } 
+        }
     }
 
     update() {
         this.snackMovement();
-    }
-
-    checkLimits() {
-
     }
 
     drawSnake() {
@@ -225,23 +258,32 @@ class Board {
     }
 
     up() {
-        this.snake.xspeed = 0;
-        this.snake.yspeed = - this.snake.speed;
+        if (this.snake.xspeed != 0) {
+            this.snake.xspeed = 0;
+            this.snake.yspeed = - this.snake.speed;
+        }
     }
 
     left() {
-        this.snake.xspeed = - this.snake.speed;
-        this.snake.yspeed = 0;
+        if (this.snake.yspeed != 0) {
+            this.snake.xspeed = - this.snake.speed;
+            this.snake.yspeed = 0;
+        }
+
     }
 
     down() {
-        this.snake.xspeed = 0;
-        this.snake.yspeed = this.snake.speed;
+        if (this.snake.xspeed != 0) {
+            this.snake.xspeed = 0;
+            this.snake.yspeed = this.snake.speed;
+        }
     }
 
     right() {
-        this.snake.xspeed = this.snake.speed;
-        this.snake.yspeed = 0;
+        if (this.snake.yspeed != 0) {
+            this.snake.xspeed = this.snake.speed;
+            this.snake.yspeed = 0;
+        }
     }
 }
 
