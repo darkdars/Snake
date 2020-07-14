@@ -1,89 +1,24 @@
+// Colors
 var gray = 51;
 var white = 255;
 var black = 0;
+var yellow = [255, 255, 0];
+var violet = [238,130,238];
 var board = null
+
+// Enviromnent variables
 var sizeWindowX = 600;
 var sizeWindowY = 600;
-
-
-class Snake {
-    _body = [];
-    _xspeed = 0;
-    _yspeed = 0;
-    _speed = 1;
-
-    constructor() {
-        this._body.push(new Blocks(sizeWindowX / 2, sizeWindowY / 2));
-        this._body.push(new Blocks(sizeWindowX / 2, sizeWindowY / 2 - 10));
-        this._body.push(new Blocks(sizeWindowX / 2, sizeWindowY / 2 -20));
-        this._yspeed = -this._speed;
-    }
-
-    get body() {
-        return this._body;
-    }
-    set body(value) {
-        this._body = value;
-    }
-
-    get xspeed() {
-        return this._xspeed;
-    }
-    set xspeed(value) {
-        this._xspeed = value;
-    }
-
-    get yspeed() {
-        return this._yspeed;
-    }
-    set yspeed(value) {
-        this._yspeed = value;
-    }
-
-    get speed() {
-        return this._speed;
-    }
-    set speed(value) {
-        this._speed = value;
-    }
-
-    snackMovement() {
-        this.bodyMovement();
-        this.headMovement();
-
-
-    }
-
-    headMovement() {
-        let body = this.body[0];
-
-        body.pos_x += this.xspeed * body.size_x;
-        body.pos_y += this.yspeed * body.size_y;
-
-        body.pos_x = constrain(body.pos_x, 0 , sizeWindowX - body._size_x);
-        body.pos_y = constrain(body.pos_y, 0 , sizeWindowY - body.size_y);
-    }
-
-    bodyMovement() {
-        for (let i = this.body.length - 1; i > 0; i--) {
-            this.body[i].pos_x = this.body[i - 1].pos_x;
-            this.body[i].pos_y = this.body[i - 1].pos_y;
-        }
-    }
-
-}
+var frame_rate = 10;
+var size = 20;
 
 class Blocks {
     _pos_x = -1;
     _pos_y = -1;
-    _size_x = 10;
-    _size_y = 10;
-    _color = 0;
 
-    constructor(pos_x, pos_y, color) {
+    constructor(pos_x, pos_y) {
         this._pos_x = pos_x;
         this._pos_y = pos_y;
-        this._color = color;
     }
 
     get pos_x() {
@@ -99,39 +34,164 @@ class Blocks {
     set pos_y(value) {
         this._pos_y = value;
     }
+    
 
-    get size_y() {
-        return this._size_y;
-    }
-    set size_y(value) {
-        this._size_y = value;
+}
+
+class Snake {
+    _head = null;
+    _body = [];
+    _xspeed = 0;
+    _yspeed = 0;
+    _speed = 1;
+    _total = 0;
+
+    constructor() {
+        this._head = new Blocks(floor(sizeWindowX / 2), floor(sizeWindowY / 2));
+        this._yspeed = -this._speed;
+        this._total = 0;
+        this._distance = 20;
     }
 
-    get size_x() {
-        return this._size_x;
+    get head() {
+        return this._head;
     }
-    set size_x(value) {
-        this._size_x = value;
+
+    set head(value) {
+        this._head = value;
+    }
+
+    get body() {
+        return this._body;
+    }
+
+    set body(value) {
+        this._body = value;
+    }
+
+    get xspeed() {
+        return this._xspeed;
+    }
+
+    set xspeed(value) {
+        this._xspeed = value;
+    }
+
+    get yspeed() {
+        return this._yspeed;
+    }
+
+    set yspeed(value) {
+        this._yspeed = value;
+    }
+
+    get speed() {
+        return this._speed;
+    }
+    set speed(value) {
+        this._speed = value;
+    }
+
+    get total() {
+        return this._total;
+    }
+
+    set total(value) {
+        this._total = value;
+    }
+
+    movement() {
+        this.bodyMovement();
+        this.headMovement();
+    }
+
+    headMovement() {
+        let head = this.head;
+
+        head.pos_x += this.xspeed * size;
+        head.pos_y += this.yspeed * size;
+
+        head.pos_x = constrain(head.pos_x, 0, sizeWindowX - size);
+        head.pos_y = constrain(head.pos_y, 0, sizeWindowY - size);
+    }
+
+    bodyMovement() {
+        for (let i = 0 ; i <  this.body.length - 1; i++) {
+            this.body[i] = this.body[i + 1];
+        }
+        this.body[this.body.length - 1] = new Blocks(this.head.pos_x, this.head.pos_y);
+    }
+
+    eat(){
+        this.total += 1;
+        this.addTail();
+    }
+
+    addTail(){
+        let pos_x = this.head.pos_x;
+        let pos_y = this.head.pos_y;
+
+        this.body.push(new Blocks(pos_x, pos_y));
     }
 
 }
 
 class Board {
     _snake = null;
+    _food = null;
 
     constructor() {
         this._snake = new Snake();
+        this._food = this.randomFood();
     }
 
     get snake() {
         return this._snake;
     }
+
     set snake(value) {
         this._snake = value;
     }
 
+    get food() {
+        return this._food;
+    }
+
+    set food(value) {
+        this._food = value;
+    }
+
+    getRandom(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    randomFood() {
+        var cols = floor(sizeWindowX / size);
+        var rows = floor(sizeWindowY / size);
+        let x = floor(this.getRandom(1, cols - 1) * size);
+        let y = floor(this.getRandom(1, rows - 1) * size);
+        return new Blocks(x, y);
+    }
+
     snackMovement() {
-        this.snake.snackMovement();
+        this.snake.movement();
+        this.snakeEat();
+    }
+
+    snakeEat() {   
+        if (this.checkColisionBetweenTwoBlocks(this.snake.head, this.food)) {
+            this.food = this.randomFood();
+            this.snake.eat();
+        }
+    }
+
+    checkColisionBetweenTwoBlocks(block1, block2){
+        var d = dist(block1.pos_x , block1.pos_y, block2.pos_x, block2.pos_y);
+        if(d < size/2 + 5){
+            return true;
+        }else{
+            return false;
+        } 
     }
 
     update() {
@@ -143,44 +203,53 @@ class Board {
     }
 
     drawSnake() {
+        fill(violet);
+        let head = this.snake.head;
+        rect(head.pos_x, head.pos_y, size, size);
+
         fill(white);
         let body = this.snake.body;
         for (let i = 0; i < body.length; i++) {
-            rect(body[i].pos_x, body[i].pos_y, body[i].size_x, body[i].size_y);
+            rect(body[i].pos_x, body[i].pos_y, size, size);
         }
+    }
+
+    drawFood() {
+        fill(yellow);
+        rect(this.food.pos_x, this.food.pos_y, size, size);
     }
 
     show() {
         this.drawSnake();
+        this.drawFood();
     }
 
-    upArrow() {
+    up() {
         this.snake.xspeed = 0;
         this.snake.yspeed = - this.snake.speed;
     }
 
-    leftArrow() {
+    left() {
         this.snake.xspeed = - this.snake.speed;
         this.snake.yspeed = 0;
     }
 
-    downArrow() {
+    down() {
         this.snake.xspeed = 0;
         this.snake.yspeed = this.snake.speed;
     }
 
-    rightArrow() {
+    right() {
         this.snake.xspeed = this.snake.speed;
         this.snake.yspeed = 0;
     }
-
 }
 
 function setup() {
     board = new Board();
     createCanvas(sizeWindowX, sizeWindowY);
     background(gray);
-    frameRate(10);
+    frameRate(frame_rate);
 
 }
 
@@ -193,12 +262,12 @@ function draw() {
 
 function keyPressed() {
     if (keyCode === LEFT_ARROW) {
-        board.leftArrow();
+        board.left();
     } else if (keyCode === RIGHT_ARROW) {
-        board.rightArrow();
+        board.right();
     } else if (keyCode === UP_ARROW) {
-        board.upArrow();
+        board.up();
     } else if (keyCode === DOWN_ARROW) {
-        board.downArrow();
+        board.down();
     }
 }
