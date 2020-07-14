@@ -1,2 +1,2 @@
 # Snake Game
- Snake Game in JavaScript using p5.js library.
+ Simple Snake Game in JavaScript using p5.js library.
