@@ -157,7 +157,7 @@ class Snake {
             var pos = this.body[i];
             var d = dist(head.pos_x, head.pos_y, pos.pos_x, pos.pos_y);
 
-            if (d < 1) {
+            if (d < size ) {
                 return true;
             }
 
@@ -224,7 +224,7 @@ class Board {
 
     checkColisionBetweenTwoBlocks(block1, block2) {
         var d = dist(block1.pos_x, block1.pos_y, block2.pos_x, block2.pos_y);
-        if (d < size / 2 + 5) {
+        if (d < size ) {
             return true;
         } else {
             return false;
