@@ -7,10 +7,10 @@ var violet = [238, 130, 238];
 var board = null
 
 // Enviromnent variables
-var sizeWindowX = 600;
-var sizeWindowY = 600;
+var sizeWindowX = 300;
+var sizeWindowY = 300;
 var frame_rate = 10;
-var size = 15;
+var size = 10;
 
 class Blocks {
     _pos_x = -1;
@@ -118,10 +118,12 @@ class Snake {
     }
 
     bodyMovement() {
-        for (let i = 0; i < this.body.length - 1; i++) {
-            this.body[i] = this.body[i + 1];
+        if(this.body.length > 0){
+            for (let i = 0; i < this.body.length - 1; i++) {
+                this.body[i] = this.body[i + 1];
+            }
+            this.body[this.body.length - 1] = new Blocks(this.head.pos_x, this.head.pos_y);
         }
-        this.body[this.body.length - 1] = new Blocks(this.head.pos_x, this.head.pos_y);
     }
 
     eat() {
